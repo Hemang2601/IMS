@@ -1,0 +1,116 @@
+To develop a complete inventory management system (Dead Stock Register) with PHP, HTML, and CSS, here’s a comprehensive list of key pages that you can create. These pages will handle user authentication, stock management, and administrative tasks.
+
+### Full List of Pages for Your Inventory Management System:
+
+---
+
+### Authentication and User Management Pages:
+1. `login.php`: User login page (for existing users to access the dashboard).
+2. `register.php`: User registration page (for new users to sign up).
+3. `logout.php`: Logout page (to handle user logout functionality).
+4. `forgot_password.php` (Optional): Allow users to reset their password if forgotten.
+5. `reset_password.php` (Optional): Page to reset the password after email verification.
+
+---
+
+### Dashboard Pages:
+6. `dashboard.php`: Main dashboard (overview of dead stock items, user stats, and quick access to features).
+7. `profile.php`: User profile page (for users to view and update their personal information).
+
+---
+
+### Inventory Management Pages:
+8. `add_item.php`: Form to add a new dead stock item (with fields like name, description, quantity, date added, status).
+9. `edit_item.php`: Page to edit the details of an existing stock item.
+10. `delete_item.php`: Handle the deletion of dead stock items from the inventory.
+11. `view_items.php`: View a list of all dead stock items in the system (with options to edit, delete, or update status).
+12. `item_details.php`: Detailed view of a single stock item (showing full details like history, quantity, etc.).
+
+---
+
+### Advanced Inventory Pages:
+13. `search_items.php`: Page to search for specific items in the dead stock register by name, date, or status.
+14. `filter_items.php`: Filter dead stock items by status, category, or date added.
+15. `generate_report.php`: Generate inventory reports (CSV or PDF format) for dead stock items.
+16. `low_stock_alerts.php`: Show alerts or notifications for items that are low in stock or reaching expiry.
+
+---
+
+### Admin and Settings Pages:
+17. `admin_dashboard.php`: Admin-only dashboard (for managing users, stock, and settings).
+18. `manage_users.php`: Page for admins to view, add, edit, and delete user accounts.
+19. `settings.php`: General system settings page (for admin to configure things like stock thresholds, user roles, etc.).
+
+---
+
+### Miscellaneous Pages:
+20. `contact.php`: A contact page (optional) for inquiries and support.
+21. `about.php`: An "About" page describing the purpose of the system.
+22. `help.php` (Optional): A help or FAQ page to guide users on how to use the system.
+
+---
+
+### Potential Folder Structure:
+
+```plaintext
+|-- assets/
+|   |-- css/            # All CSS files (style.css)
+|   |-- js/             # JavaScript files (custom scripts, SweetAlert, etc.)
+|   |-- images/         # Images (logo, icons, etc.)
+|
+|-- includes/           # Reusable PHP scripts (header, footer, DB connection)
+|   |-- header.php      # Common header file
+|   |-- footer.php      # Common footer file
+|   |-- db.php          # Database connection
+|
+|-- login.php           # User login page
+|-- register.php        # User registration page
+|-- dashboard.php       # Main user/admin dashboard
+|-- add_item.php        # Add stock item page
+|-- view_items.php      # View all stock items
+|-- edit_item.php       # Edit stock item page
+|-- delete_item.php     # Delete stock item script
+|-- profile.php         # User profile page
+|-- logout.php          # Logout script
+|-- settings.php        # Admin settings page
+|-- manage_users.php    # Manage users (admin only)
+```
+
+---
+
+### Page Summaries:
+
+#### `login.php`:
+- Login form with fields for email and password.
+- PHP logic to validate user credentials and start a session.
+
+#### `register.php`:
+- User registration form with fields like name, email, password.
+- PHP logic to insert new users into the database.
+
+#### `dashboard.php`:
+- Overview of the system, showing dead stock statistics, recent items added, and alerts for low stock.
+
+#### `add_item.php`:
+- A form where users can add new stock items (name, description, quantity, date, and status).
+- PHP code to insert stock items into the `dead_stock` table.
+
+#### `view_items.php`:
+- Display all dead stock items in a table format.
+- Include actions to edit, delete, and filter stock items.
+
+#### `edit_item.php`:
+- Allows users to update the details of an existing stock item.
+
+#### `delete_item.php`:
+- Logic to remove an item from the database (with a confirmation alert).
+
+#### `settings.php`:
+- Page for admin users to configure settings for the system (e.g., stock limits, user roles).
+
+#### `generate_report.php`:
+- Generate detailed reports (PDF/CSV) based on the current stock status.
+
+---
+
+By following this structure, you will have a well-rounded inventory management system with all the necessary functionalities. Each page can be developed iteratively, ensuring that the core features (like adding and managing items) work first before adding advanced features (like reporting and search).
