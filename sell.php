@@ -169,82 +169,123 @@ h2 {
     color: #333;
 }
 
+/* General Form Container */
 .form {
     margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
+    max-width: 600px;
 }
 
+/* Form Group Styling */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: #333;
 }
 
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Inputs and Select Fields */
+.form-group input, 
+.form-group select {
+    width: 95%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+    color: #333;
+    transition: border-color 0.3s ease;
 }
 
+/* Input Focus Effect */
+.form-group input:focus, 
+.form-group select:focus {
+    border-color: #28a745;
+    outline: none;
+    background-color: #fff;
+}
+
+/* Button Styling */
 .btn {
-    padding: 10px 15px;
+    padding: 12px 20px;
     background-color: #28a745;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn:hover {
     background-color: #218838;
+    transform: scale(1.05);
 }
 
+/* Table Styles */
 .table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
-.table th, .table td {
-    padding: 10px;
+.table th, 
+.table td {
+    padding: 15px;
     border: 1px solid #ddd;
     text-align: left;
+    font-size: 16px;
 }
 
 .table th {
-    background-color: #f4f4f4;
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
 }
 
+/* Alert Styles */
 .alert {
-    padding: 10px;
+    padding: 12px;
     margin-top: 15px;
     border-radius: 5px;
+    font-size: 14px;
 }
 
 .alert.danger {
     background-color: #f8d7da;
     color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
+/* Invoice Styling */
 .invoice {
-    margin-top: 20px;
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .invoice h3 {
     margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
 }
 
 .row {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .col {
@@ -254,4 +295,25 @@ h2 {
 .text-right {
     text-align: right;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .form {
+        padding: 15px;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .col {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .invoice {
+        padding: 15px;
+    }
+}
+
 </style>

@@ -1,191 +1,140 @@
-/* General Body Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-}
-
-/* Container for managing items */
+/* General container styling for items management */
 .items-management-container {
-    width: 90%;
+    padding: 20px;
+    background-color: #ffffff; /* White for clean background */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Softer, more pronounced shadow */
     margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 1200px; /* Constrain the container width for better readability */
 }
 
-/* Header Style */
-.items-management-container h1 {
+/* Dropdown styling for categories */
+.category-dropdown {
     text-align: center;
-    color: #333;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
-/* Container for item cards */
-.item-cards-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 cards per row */
-    gap: 20px;
-}
-
-/* Individual Item Card */
-.item-card {
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Hover Effect */
-.item-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Item Card Image */
-.item-card-image {
-    height: 200px;
-    overflow: hidden;
-}
-
-.item-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Item Card Body */
-.item-card-body {
-    padding: 20px;
-    flex-grow: 1;
-    background-color: #fafafa;
-}
-
-.item-card-body h3 {
-    margin: 0;
-    color: #333;
-    font-size: 1.15em;
-    font-weight: bold;
-}
-
-.item-card-body p {
-    margin: 10px 0;
-    color: #666;
-    font-size: 0.9em;
-}
-
-.item-card-body strong {
-    color: #333;
-}
-
-/* Item Card Actions */
-.item-card-actions {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background-color: #f1f1f1;
-    border-top: 1px solid #ddd;
-}
-
-.item-card-actions .btn-edit,
-.item-card-actions .btn-delete {
-    text-decoration: none;
-    color: #fff;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 0.9em;
-    display: flex;
-    align-items: center;
-    transition: background-color 0.3s;
-}
-
-.item-card-actions .btn-edit {
-    background-color: #4CAF50;
-}
-
-.item-card-actions .btn-edit:hover {
-    background-color: #45a049;
-}
-
-.item-card-actions .btn-delete {
-    background-color: #f44336;
-}
-
-.item-card-actions .btn-delete:hover {
-    background-color: #e53935;
-}
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-}
-
-.modal-close {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.modal-close:hover,
-.modal-close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Modal Form */
-.modal form {
-    display: flex;
-    flex-direction: column;
-}
-
-.modal label {
-    margin: 10px 0 5px;
-    color: #333;
-}
-
-.modal input[type="text"],
-.modal input[type="number"],
-.modal input[type="file"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 10px;
-}
-
-.modal button {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+.category-dropdown select {
+    padding: 12px 18px; /* More padding for a premium feel */
+    border: 2px solid #1e3a8a; /* Blue border */
+    border-radius: 8px; /* Rounder corners for modern design */
     font-size: 16px;
+    background-color: #f9f9f9; /* Slight off-white background */
+    color: #333333; /* Dark Gray Text */
+    transition: border-color 0.3s ease; /* Smooth transition effect */
 }
 
-.modal button:hover {
-    background-color: #45a049;
+.category-dropdown select:hover, .category-dropdown select:focus {
+    border-color: #1e3a8a; /* Blue when hovering or focused */
+    outline: none;
+}
+
+/* Table styling for items */
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.items-table th, .items-table td {
+    padding: 18px; /* More spacious padding */
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0; /* Light gray borders */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+/* Header styling */
+.items-table th {
+    background-color: #1e3a8a; /* Blue */
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase; /* Adds a modern, professional feel */
+}
+
+/* Table row hover effect */
+.items-table td:hover {
+    background-color: #f0f0f0; /* Soft gray for hover effect */
+}
+
+/* Image styling for items in table */
+.items-table td img.item-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px; /* Softer, rounder edges */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds depth to images */
+}
+
+/* Button styling */
+.btn {
+    padding: 8px 12px; /* Reduced padding for smaller buttons */
+    font-size: 14px; /* Smaller font size */
+    border-radius: 6px; /* Slightly rounder corners */
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px; /* Reduced margin between buttons */
+}
+
+/* Button with icon only styling */
+.btn-icon {
+    width: 32px; /* Smaller width */
+    height: 32px; /* Smaller height */
+    line-height: 32px; /* Align text vertically */
+    font-size: 14px; /* Icon size */
+    border: none;
+}
+
+/* Primary button (Edit) styling */
+.btn-primary {
+    background-color: #1e3a8a; /* Blue */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}
+
+.btn-primary:hover {
+    background-color: #162b6a; /* Darker Blue on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+/* Danger button (Delete) styling */
+.btn-danger {
+    background-color: #F44336; /* Red */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}
+
+.btn-danger:hover {
+    background-color: #D32F2F; /* Darker Red on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+/* Hover effect for table rows */
+.items-table td:hover {
+    background-color: #f9f9f9; /* Subtle light gray hover effect */
+}
+
+/* Responsiveness for mobile devices */
+@media screen and (max-width: 768px) {
+    .items-table th, .items-table td {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .category-dropdown select {
+        font-size: 14px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 8px 12px; /* Consistent with button size changes */
+    }
+
+    .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 12px; /* Adjusted icon size for smaller screens */
+    }
 }

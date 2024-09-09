@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" href="assets/css/add_item.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" href="assets/css/view_items.css">
     <link rel="stylesheet" href="assets/css/manage_items.css">
     <link rel="stylesheet" href="assets/css/sell.css">
+    <link rel="stylesheet" href="assets/css/add_category.css">
+    <link rel="stylesheet" href="assets/css/manage_dead_stock.css">
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
@@ -31,14 +33,25 @@
             <!-- Text-based Logo -->
             <a href="dashboard.php" style="text-decoration: none; color: #ffffff;">
                 <h1 style="font-size: 28px; font-weight: 700; margin: 0; letter-spacing: 1px; font-family: 'Roboto', sans-serif;">
-                    Inventory Management System
+                    I M S
                 </h1>
             </a>
 
             <!-- Navigation Links -->
             <ul class="navbar-links">
                 <li><a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-                
+
+                <!-- Manage Category Dropdown -->
+                <li class="dropdown">
+                    <button class="dropbtn" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-tags"></i> Category <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content" aria-label="Manage Category options">
+                        <a href="add_category.php"><i class="fas fa-plus"></i> Add Category</a>
+                        <a href="edit_category.php"><i class="fas fa-edit"></i> Edit Category</a>
+                    </div>
+                </li>
+
                 <!-- Inventory Dropdown -->
                 <li class="dropdown">
                     <button class="dropbtn" aria-haspopup="true" aria-expanded="false">
@@ -51,7 +64,16 @@
                     </div>
                 </li>
 
-                <li><a href="buy.php"><i class="fas fa-shopping-cart"></i> Buy</a></li>
+                <!-- Dead Stock Dropdown -->
+                <li class="dropdown">
+                    <button class="dropbtn" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-archive"></i> Dead Stock <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content" aria-label="Dead Stock options">
+                        <a href="manage_dead_stock.php"><i class="fas fa-edit"></i> Manage Stock</a>
+                    </div>
+                </li>
+
                 <li><a href="sell.php"><i class="fas fa-store"></i> Sell</a></li>
                 <li><a href="generate_report.php"><i class="fas fa-chart-bar"></i> Reports</a></li>
                 <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
@@ -73,8 +95,3 @@
         </div>
     </nav>
 </header>
-
-<!-- Rest of your page content -->
-
-</body>
-</html>

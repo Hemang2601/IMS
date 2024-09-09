@@ -4,35 +4,43 @@ include 'includes/header.php';
 include 'session_check.php'; 
 include 'includes/db.php';
 
-// Handle item deletion
+// Initialize success flags
 $delete_success = false;
+$update_success = false;
+
+// Handle item deletion
 if (isset($_GET['delete'])) {
     $item_id = intval($_GET['delete']);
 
     // Ensure the item belongs to the current user
-    $sql = "DELETE FROM items WHERE id = $item_id AND user_id = $user_id";
-    if ($conn->query($sql) === TRUE) {
+    $stmt = $conn->prepare("DELETE FROM items WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $item_id, $user_id);
+
+    if ($stmt->execute()) {
         $delete_success = true;
     } else {
         echo "Error deleting item: " . $conn->error;
     }
+    $stmt->close();
 }
 
 // Handle item update
-$update_success = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_item') {
     $item_id = intval($_POST['item_id']);
     $name = htmlspecialchars($_POST['name']);
-    $category = htmlspecialchars($_POST['category']);
+    $category_id = intval($_POST['category']);
     $quantity = intval($_POST['quantity']);
     $price = floatval($_POST['price']);
     $image = $_FILES['image']['name'];
     $image_temp = $_FILES['image']['tmp_name'];
 
     // Fetch the current item details
-    $sql = "SELECT image FROM items WHERE id = $item_id AND user_id = $user_id";
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare("SELECT image FROM items WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $item_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $item = $result->fetch_assoc();
+    $stmt->close();
 
     // Update item image if a new file is uploaded
     if (!empty($image)) {
@@ -58,18 +66,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     // Update item in the database
-    $sql_update = "UPDATE items SET name = '$name', category = '$category', quantity = $quantity, price = $price, image = '$image' WHERE id = $item_id AND user_id = $user_id";
+    $stmt = $conn->prepare("UPDATE items SET name = ?, category_id = ?, quantity = ?, price = ?, image = ? WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("siidisii", $name, $category_id, $quantity, $price, $image, $item_id, $user_id);
 
-    if ($conn->query($sql_update) === TRUE) {
+    if ($stmt->execute()) {
         $update_success = true;
     } else {
         echo "Error updating item: " . $conn->error;
     }
+    $stmt->close();
 }
 
-// Fetch all items from the database
-$sql = "SELECT * FROM items WHERE user_id = $user_id";
-$result = $conn->query($sql);
+// Fetch all items with categories from the database
+$stmt = $conn->prepare("SELECT items.*, categories.category_name FROM items 
+                        JOIN categories ON items.category_id = categories.id 
+                        WHERE items.user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -114,37 +128,59 @@ $result = $conn->query($sql);
 <div class="items-management-container">
     <h1>Manage Your Items</h1>
 
-    <div class="item-cards-container">
-        <?php if ($result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()): ?>
-                <div class="item-card">
-                    <div class="item-card-image">
-                        <?php if ($row['image']): ?>
-                            <img src="<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
-                        <?php else: ?>
-                            <img src="default-image.png" alt="No Image">
-                        <?php endif; ?>
-                    </div>
-                    <div class="item-card-body">
-                        <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                        <p><strong>Category:</strong> <?php echo htmlspecialchars($row['category']); ?></p>
-                        <p><strong>Quantity:</strong> <?php echo htmlspecialchars($row['quantity']); ?></p>
-                        <p><strong>Price:</strong> ₹<?php echo htmlspecialchars($row['price']); ?></p>
-                        <div class="item-card-actions">
-                            <a href="javascript:void(0);" class="btn-edit" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo addslashes($row['name']); ?>', '<?php echo addslashes($row['category']); ?>', <?php echo $row['quantity']; ?>, <?php echo $row['price']; ?>)">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <a href="manage_items.php?delete=<?php echo $row['id']; ?>" class="btn-delete">
-                                <i class="fas fa-trash"></i> Delete
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <p>No items found.</p>
-        <?php endif; ?>
+    <!-- Category Dropdown -->
+    <div class="category-dropdown">
+        <select id="categorySelect" onchange="filterCategory(this.value)">
+            <option value="all">All Categories</option>
+            <?php
+            // Fetch unique categories for the dropdown
+            $categories = $conn->query("SELECT * FROM categories");
+            while ($cat = $categories->fetch_assoc()) {
+                echo '<option value="' . $cat['id'] . '">' . htmlspecialchars($cat['category_name']) . '</option>';
+            }
+            ?>
+        </select>
     </div>
+
+    <!-- Items Table -->
+<table class="items-table">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="itemsTableBody">
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo '<tr data-category="' . htmlspecialchars($row['category_id']) . '">
+                    <td><img src="' . htmlspecialchars($row['image']) . '" alt="' . htmlspecialchars($row['name']) . '" class="item-image"></td>
+                    <td>' . htmlspecialchars($row['name']) . '</td>
+                    <td>' . htmlspecialchars($row['category_name']) . '</td>
+                    <td>' . htmlspecialchars($row['quantity']) . '</td>
+                    <td>₹' . htmlspecialchars($row['price']) . '</td>
+                    <td class="item-card-actions">
+                        <a href="javascript:void(0);" class="btn-edit" onclick="openEditModal(' . $row['id'] . ', \'' . addslashes($row['name']) . '\', ' . $row['category_id'] . ', ' . $row['quantity'] . ', ' . $row['price'] . ')">
+                            <button class="btn btn-icon btn-primary"><i class="fas fa-edit"></i></button>
+                        </a>
+                        <a href="manage_items.php?delete=' . $row['id'] . '" class="btn-delete">
+                            <button class="btn btn-icon btn-danger"><i class="fas fa-trash"></i></button>
+                        </a>
+                    </td>
+                </tr>';
+            }
+        } else {
+            echo '<tr><td colspan="6">No items found.</td></tr>';
+        }
+        ?>
+    </tbody>
+</table>
+
 </div>
 
 <!-- Edit Item Modal -->
@@ -158,7 +194,14 @@ $result = $conn->query($sql);
             <label for="name">Name:</label>
             <input type="text" id="item_name" name="name" required>
             <label for="category">Category:</label>
-            <input type="text" id="item_category" name="category" required>
+            <select id="item_category" name="category" required>
+                <?php
+                $categories = $conn->query("SELECT * FROM categories");
+                while ($cat = $categories->fetch_assoc()) {
+                    echo '<option value="' . $cat['id'] . '">' . htmlspecialchars($cat['category_name']) . '</option>';
+                }
+                ?>
+            </select>
             <label for="quantity">Quantity:</label>
             <input type="number" id="item_quantity" name="quantity" required>
             <label for="price">Price:</label>
@@ -177,6 +220,7 @@ function openEditModal(id, name, category, quantity, price) {
     document.getElementById('item_category').value = category;
     document.getElementById('item_quantity').value = quantity;
     document.getElementById('item_price').value = price;
+
     document.getElementById('editItemModal').style.display = 'block';
 }
 
@@ -184,20 +228,16 @@ function closeEditModal() {
     document.getElementById('editItemModal').style.display = 'none';
 }
 
-// Close modal when clicking outside of it
-window.onclick = function(event) {
-    if (event.target == document.getElementById('editItemModal')) {
-        closeEditModal();
+function filterCategory(categoryId) {
+    var tableRows = document.getElementById('itemsTableBody').getElementsByTagName('tr');
+    for (var i = 0; i < tableRows.length; i++) {
+        var row = tableRows[i];
+        if (row.getAttribute('data-category') === categoryId || categoryId === 'all') {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
     }
 }
 </script>
-
-</body>
-</html>
-
-<?php
-// Close the database connection
-$conn->close();
-?>
-
 <?php include 'includes/footer.php'; ?>
