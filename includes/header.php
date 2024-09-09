@@ -9,13 +9,18 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" href="assets/css/add_item.css">
-
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/view_items.css">
+    <link rel="stylesheet" href="assets/css/manage_items.css">
+    <link rel="stylesheet" href="assets/css/sell.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Link to external JS (if needed) -->
     <script src="assets/js/scripts.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -41,8 +46,7 @@
                     </button>
                     <div class="dropdown-content" aria-label="Inventory options">
                         <a href="add_item.php"><i class="fas fa-plus"></i> Add Item</a>
-                        <a href="update_item.php"><i class="fas fa-edit"></i> Update Item</a>
-                        <a href="remove_item.php"><i class="fas fa-trash"></i> Remove Item</a>
+                        <a href="manage_items.php"><i class="fas fa-edit"></i> Manage Items</a>
                         <a href="view_items.php"><i class="fas fa-eye"></i> View All Items</a>
                     </div>
                 </li>

@@ -4,7 +4,7 @@
     <div class="card">
         <h1 class="card-title">Add New Inventory Item</h1>
 
-        <form action="process_add_item.php" method="POST" class="add-item-form">
+        <form action="process_add_item.php" method="POST" enctype="multipart/form-data" class="add-item-form">
             <div class="form-group">
                 <label for="item_name">Item Name</label>
                 <div class="input-icon">
@@ -37,11 +37,17 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label for="item_image">Image</label>
+                <div class="input-icon">
+                    <i class="fas fa-image"></i>
+                    <input type="file" id="item_image" name="item_image" accept="image/*">
+                </div>
+            </div>
+
             <button type="submit" class="btn"><i class="fas fa-plus-circle"></i> Add Item</button>
         </form>
     </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>
-
-
