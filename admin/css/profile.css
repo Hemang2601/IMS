@@ -1,0 +1,174 @@
+/* Profile Container */
+.profile-container {
+    margin: 50px auto;
+    max-width: 900px;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Profile Header */
+.profile-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.profile-header h1 {
+    font-size: 2.5rem;
+    color: #1e3a8a;
+    margin-bottom: 10px;
+}
+
+.profile-header p {
+    font-size: 1.1rem;
+    color: #666666;
+}
+
+/* Profile Card */
+.profile-card {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+}
+
+.profile-card .profile-image {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card h3 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 10px 0;
+}
+
+.profile-card p {
+    font-size: 1rem;
+    color: #888888;
+}
+
+/* Profile Info Form */
+.profile-info .form-group {
+    margin-bottom: 20px;
+}
+
+.profile-info label {
+    font-size: 1.1rem;
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
+.profile-info input[type="text"], 
+.profile-info input[type="email"], 
+.profile-info input[type="password"] {
+    width: 95%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #333333;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+}
+
+.profile-info input[type="text"]:focus, 
+.profile-info input[type="email"]:focus, 
+.profile-info input[type="password"]:focus {
+    border-color: #1e3a8a;
+    outline: none;
+}
+
+/* Update Button */
+.profile-info .btn-primary {
+    width: 100%;
+    background-color: #1e3a8a;
+    color: #ffffff;
+    border: none;
+    padding: 12px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-info .btn-primary:hover {
+    background-color: #3b82f6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .profile-info .col-md-4 {
+        text-align: center;
+    }
+
+    .profile-info .col-md-8 .btn-primary {
+        width: 100%;
+    }
+}
+/* Profile Info Form */
+.profile-info form {
+    width: 100%;
+}
+
+/* Align form fields in two columns */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Form group should be half-width */
+.form-group {
+    flex: 1;
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.form-control {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f9fafb;
+}
+
+.btn-primary {
+    background-color: #1e3a8a;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #3b82f6;
+}
+

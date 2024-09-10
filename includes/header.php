@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="assets/css/sell.css">
     <link rel="stylesheet" href="assets/css/add_category.css">
     <link rel="stylesheet" href="assets/css/manage_dead_stock.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="assets/css/generate_report.css">
+    
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

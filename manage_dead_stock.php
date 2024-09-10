@@ -5,11 +5,45 @@ include 'includes/db.php';
 
 $update_success = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_item') {
-    // Update logic here
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'sell_full') {
+    $item_id = $_POST['item_id'];
+    $quantity = $_POST['quantity'];
+    $price = $_POST['price'];
+
+    // Insert into sales table
+    $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Full Sale', NOW())");
+    $total_amount = $quantity * $price;
+    $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
+    if ($stmt->execute()) {
+        // Update item quantity to 0 after selling full
+        $stmt_update = $conn->prepare("UPDATE items SET quantity = 0 WHERE id = ?");
+        $stmt_update->bind_param("i", $item_id);
+        $stmt_update->execute();
+        
+        $update_success = true;
+    }
 }
 
-// Prepare and execute the SQL statement
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'offer') {
+    $item_id = $_POST['item_id'];
+    $quantity = $_POST['quantity'];
+    $price = $_POST['price'];
+    
+    // Insert into sales table as an Offer
+    $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Offer', NOW())");
+    $total_amount = $quantity * $price;
+    $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
+    if ($stmt->execute()) {
+        // Update item quantity (if partially sold)
+        $stmt_update = $conn->prepare("UPDATE items SET quantity = quantity - ? WHERE id = ?");
+        $stmt_update->bind_param("ii", $quantity, $item_id);
+        $stmt_update->execute();
+        
+        $update_success = true;
+    }
+}
+
+// Prepare and execute the SQL statement for retrieving dead stock items
 $stmt = $conn->prepare("SELECT items.*, categories.category_name FROM items 
                         JOIN categories ON items.category_id = categories.id 
                         WHERE items.user_id = ? AND items.quantity != 0");
@@ -17,10 +51,8 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Initialize total dead stock amount variable
+// Calculate the total dead stock amount
 $total_dead_stock_amount = 0;
-
-// Iterate over the results and calculate the total dead stock amount
 while ($row = $result->fetch_assoc()) {
     $item_total_value = $row['quantity'] * $row['price'];
     $total_dead_stock_amount += $item_total_value; 
@@ -31,8 +63,8 @@ while ($row = $result->fetch_assoc()) {
     <script>
         Swal.fire({
             icon: 'success',
-            title: 'Updated!',
-            text: 'Dead stock item updated successfully!',
+            title: 'Success!',
+            text: 'Transaction completed successfully!',
             confirmButtonText: 'OK',
             onClose: () => {
                 window.location.href = 'manage_dead_stock.php'; 
@@ -64,9 +96,8 @@ while ($row = $result->fetch_assoc()) {
             </thead>
             <tbody id="deadStockItemsTableBody">
                 <?php
-                // Reset the result pointer
-                $result->data_seek(0);
-
+                $result->data_seek(0); // Reset result pointer
+                
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         $item_total_value = $row['quantity'] * $row['price'];
@@ -77,8 +108,8 @@ while ($row = $result->fetch_assoc()) {
                             <td>' . htmlspecialchars($row['quantity']) . '</td>
                             <td>₹' . number_format($item_total_value, 2) . '</td>
                             <td class="item-actions">
-                                <a href="sell_full.php?item_id=' . $row['id'] . '" class="btn btn-success"><i class="fas fa-check"></i> Sell Full</a>
-                                <a href="offer.php?item_id=' . $row['id'] . '" class="btn btn-warning"><i class="fas fa-tag"></i> Offer</a>
+                                <button class="btn btn-success" onclick="openLightbox(\'sell_full\', ' . $row['id'] . ', ' . $row['quantity'] . ', ' . $row['price'] . ')"><i class="fas fa-check"></i> Sell Full</button>
+                                <button class="btn btn-warning" onclick="openLightbox(\'offer\', ' . $row['id'] . ', ' . $row['quantity'] . ', ' . $row['price'] . ')"><i class="fas fa-tag"></i> Offer</button>
                             </td>
                         </tr>';
                     }
@@ -90,7 +121,54 @@ while ($row = $result->fetch_assoc()) {
         </table>
     </div>
 </div>
+
+<!-- Lightbox Modal -->
+<div id="lightboxModal" class="lightbox-modal">
+    <div class="lightbox-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="lightboxTitle">Action</h2>
+        <form id="lightboxForm" method="POST" action="">
+            <input type="hidden" name="item_id" id="item_id">
+            <input type="hidden" name="quantity" id="quantity">
+            <input type="hidden" name="price" id="price">
+            <p id="lightboxDescription"></p>
+            <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+    </div>
+</div>
+
+
 <?php include 'includes/footer.php'; ?>
-<?php
-$conn->close();
-?>
+
+<script>
+    const lightboxModal = document.getElementById('lightboxModal');
+const closeBtn = document.querySelector('.close-btn');
+
+function openLightbox(action, itemId, quantity, price) {
+    lightboxModal.style.display = 'flex';  // Changed from 'block' to 'flex' for centering
+    document.getElementById('item_id').value = itemId;
+    document.getElementById('quantity').value = quantity;
+    document.getElementById('price').value = price;
+
+    if (action === 'sell_full') {
+        document.getElementById('lightboxTitle').innerText = 'Sell Full Item';
+        document.getElementById('lightboxDescription').innerText = 'Are you sure you want to sell this item completely?';
+    } else if (action === 'offer') {
+        document.getElementById('lightboxTitle').innerText = 'Offer Item';
+        document.getElementById('lightboxDescription').innerText = 'Are you sure you want to offer this item?';
+    }
+    
+    document.getElementById('lightboxForm').innerHTML += '<input type="hidden" name="action" value="' + action + '">';
+}
+
+closeBtn.onclick = function () {
+    lightboxModal.style.display = 'none';
+};
+
+window.onclick = function (event) {
+    if (event.target === lightboxModal) {
+        lightboxModal.style.display = 'none';
+    }
+};
+
+</script>

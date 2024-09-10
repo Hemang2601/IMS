@@ -3,7 +3,7 @@ include 'includes/header.php';
 include 'includes/db.php'; 
 
 // Initialize variables
-$item_id = $quantity = $price = $customer_name = $customer_phone = "";
+$item_id = $quantity = $price = $sale_name = $customer_phone = "";
 $sale_message = "";
 
 // Fetch items from the database
@@ -22,11 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item_id = $_POST['item_id'];
     $quantity = $_POST['quantity'];
     $price = $_POST['price'];
-    $customer_name = $_POST['customer_name'];
+    $sale_name = $_POST['sale_name'];
     $customer_phone = $_POST['customer_phone'];
 
     // Basic validation
-    if (empty($item_id) || empty($quantity) || empty($price) || empty($customer_name) || empty($customer_phone)) {
+    if (empty($item_id) || empty($quantity) || empty($price) || empty($sale_name) || empty($customer_phone)) {
         $sale_message = "<div class='alert danger'>All fields are required.</div>";
     } elseif (!is_numeric($quantity) || !is_numeric($price)) {
         $sale_message = "<div class='alert danger'>Quantity and Price must be numeric.</div>";
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class='row'>
                     <div class='col'>
                         <h5>Customer Details</h5>
-                        <p><strong>Name:</strong> $customer_name</p>
+                        <p><strong>Name:</strong> $sale_name</p>
                         <p><strong>Phone:</strong> $customer_phone</p>
                     </div>
                     <div class='col text-right'>
@@ -93,14 +93,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $conn->close();
 ?>
 
-<div class="container">
+<div class="sellcontainer">
     <h2>Record a Sale</h2>
 
     <!-- Sale Form -->
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="form">
         <div class="form-group">
-            <label for="customer_name">Customer Name:</label>
-            <input type="text" id="customer_name" name="customer_name" value="<?php echo htmlspecialchars($customer_name); ?>" required>
+            <label for="sale_name">Customer Name:</label>
+            <input type="text" id="sale_name" name="sale_name" value="<?php echo htmlspecialchars($sale_name); ?>" required>
         </div>
         <div class="form-group">
             <label for="customer_phone">Customer Phone:</label>
@@ -156,164 +156,3 @@ $conn->close();
 </div>
 
 <?php include 'includes/footer.php'; ?>
-
-<!-- Custom CSS -->
-<style>
-.container {
-    margin-top: 20px;
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
-
-h2 {
-    color: #333;
-}
-
-/* General Form Container */
-.form {
-    margin-bottom: 20px;
-    padding: 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin: 30px auto;
-    max-width: 600px;
-}
-
-/* Form Group Styling */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #333;
-}
-
-/* Inputs and Select Fields */
-.form-group input, 
-.form-group select {
-    width: 95%;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background-color: #f8f8f8;
-    font-size: 16px;
-    color: #333;
-    transition: border-color 0.3s ease;
-}
-
-/* Input Focus Effect */
-.form-group input:focus, 
-.form-group select:focus {
-    border-color: #28a745;
-    outline: none;
-    background-color: #fff;
-}
-
-/* Button Styling */
-.btn {
-    padding: 12px 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn:hover {
-    background-color: #218838;
-    transform: scale(1.05);
-}
-
-/* Table Styles */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.table th, 
-.table td {
-    padding: 15px;
-    border: 1px solid #ddd;
-    text-align: left;
-    font-size: 16px;
-}
-
-.table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Alert Styles */
-.alert {
-    padding: 12px;
-    margin-top: 15px;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.alert.danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Invoice Styling */
-.invoice {
-    margin-top: 30px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.invoice h3 {
-    margin-bottom: 20px;
-    font-weight: bold;
-    color: #333;
-}
-
-.row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.col {
-    width: 48%;
-}
-
-.text-right {
-    text-align: right;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .form {
-        padding: 15px;
-    }
-
-    .row {
-        flex-direction: column;
-    }
-
-    .col {
-        width: 100%;
-        margin-bottom: 15px;
-    }
-
-    .invoice {
-        padding: 15px;
-    }
-}
-
-</style>

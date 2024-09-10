@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check input errors before querying the database
     if (empty($email_err) && empty($password_err)) {
         // Prepare a select statement
-        $sql = "SELECT id, firstname, email, password FROM users WHERE email = ?";
+        $sql = "SELECT id, firstname, email, password, role FROM users WHERE email = ?";
 
         if ($stmt = $conn->prepare($sql)) {
             // Bind variables to the prepared statement
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Check if email exists
                 if ($stmt->num_rows == 1) {
                     // Bind result variables
-                    $stmt->bind_result($id, $firstname, $email, $hashed_password);
+                    $stmt->bind_result($id, $firstname, $email, $hashed_password, $role);
 
                     if ($stmt->fetch()) {
                         // Verify password
@@ -58,6 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $_SESSION["id"] = $id;
                             $_SESSION["email"] = $email;
                             $_SESSION["firstname"] = $firstname;
+                            $_SESSION["role"] = $role; // Store user role in session
 
                             // Output SweetAlert2 script for successful login
                             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -67,9 +68,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             icon: 'success',
                                             title: 'Welcome, {$firstname}!',
                                             text: 'You have successfully logged in to INVERTO Management System.',
-                                        }).then(function() {
-                                            window.location = 'dashboard.php';
-                                        });
+                                        }).then(function() {";
+
+                            // Check the user's role and redirect accordingly
+                            if ($role == 1) {
+                                echo "window.location = 'admin/dashboard.php';"; // Redirect admin
+                            } else {
+                                echo "window.location = 'dashboard.php';"; // Redirect regular user
+                            }
+
+                            echo "    });
                                     });
                                   </script>";
                             exit;

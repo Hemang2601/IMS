@@ -1,278 +1,149 @@
-<?php include 'includes/header.php'; ?>
-<?php include 'session_check.php'; ?>
+<?php
+include 'includes/header.php';
+include 'session_check.php';
+include 'includes/db.php';
+
+// Ensure $userId is defined
+$userId = $_SESSION['id']; // Example of how you might get the userId from session
+
+// Fetch user data
+$userQuery = "SELECT firstname, lastname, username, email, store_name, store_category, phone_number FROM users WHERE id = ?";
+$stmt = $conn->prepare($userQuery);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$userResult = $stmt->get_result();
+$user = $userResult->fetch_assoc();
+
+// Fetch item data
+$itemQuery = "SELECT i.name, i.quantity, i.price, i.image, c.category_name 
+              FROM items i 
+              JOIN categories c ON i.category_id = c.id 
+              WHERE i.user_id = ?";
+$stmt = $conn->prepare($itemQuery);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$itemResult = $stmt->get_result();
+
+// Fetch category data
+$categoryQuery = "SELECT category_name, category_description FROM categories";
+$categoryResult = $conn->query($categoryQuery);
+
+// Summary data
+$itemCountQuery = "SELECT COUNT(*) AS total_items, SUM(quantity) AS total_quantity, SUM(price * quantity) AS total_amount FROM items WHERE user_id = ?";
+$stmt = $conn->prepare($itemCountQuery);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$itemSummaryResult = $stmt->get_result();
+$itemSummary = $itemSummaryResult->fetch_assoc();
+
+$categoryCountQuery = "SELECT COUNT(*) AS total_categories FROM categories";
+$categoryCountResult = $conn->query($categoryCountQuery);
+$categoryCount = $categoryCountResult->fetch_assoc();
+
+// Calculate profit and loss
+$profitLossQuery = "SELECT SUM(price * quantity) AS total_revenue, (SELECT SUM(price * quantity) FROM items WHERE user_id = ?) AS total_cost FROM items WHERE user_id = ?";
+$stmt = $conn->prepare($profitLossQuery);
+$stmt->bind_param("ii", $userId, $userId);
+$stmt->execute();
+$profitLossResult = $stmt->get_result();
+$profitLoss = $profitLossResult->fetch_assoc();
+$profitLoss['total_profit'] = $profitLoss['total_revenue'] - $profitLoss['total_cost'];
+?>
 
 <!-- Page Content -->
 <div class="dashboard-content">
-    <h2>Welcome to the Dashboard</h2>
+    <h2>Welcome, <?php echo htmlspecialchars($user['firstname']); ?></h2>
 
-    <!-- Meters Section -->
-    <div class="meters">
-        <div class="meter-container">
-            <h3>Total Quantity</h3>
-            <canvas id="totalQtyMeter"></canvas>
+    <!-- User Info Card -->
+    <div class="card user-info-card">
+        <div class="card-header">
+            <i class="fas fa-store"></i>
+            <h3>Store Information</h3>
         </div>
-        <div class="meter-container">
-            <h3>Sales</h3>
-            <canvas id="salesMeter"></canvas>
-        </div>
-        <div class="meter-container">
-            <h3>Profit</h3>
-            <canvas id="profitMeter"></canvas>
-        </div>
-        <div class="meter-container">
-            <h3>Stock</h3>
-            <canvas id="stockMeter"></canvas>
-        </div>
-        <div class="meter-container">
-            <h3>Dead Stock</h3>
-            <canvas id="deadStockMeter"></canvas>
+        <div class="card-body">
+            <p><strong>Store Name:</strong> <?php echo htmlspecialchars($user['store_name']); ?></p>
+            <p><strong>Category:</strong> <?php echo htmlspecialchars($user['store_category']); ?></p>
+            <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
+            <p><strong>Phone:</strong> <?php echo htmlspecialchars($user['phone_number']); ?></p>
         </div>
     </div>
-</div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+        <div class="card summary-card">
+            <div class="card-header">
+                <i class="fas fa-box"></i>
+                <h3>Total Items</h3>
+            </div>
+            <div class="card-body">
+                <p><?php echo htmlspecialchars($itemSummary['total_items']); ?></p>
+            </div>
+        </div>
+        <div class="card summary-card">
+            <div class="card-header">
+                <i class="fas fa-cube"></i>
+                <h3>Total Quantity</h3>
+            </div>
+            <div class="card-body">
+                <p><?php echo htmlspecialchars($itemSummary['total_quantity']); ?></p>
+            </div>
+        </div>
+        <div class="card summary-card">
+            <div class="card-header">
+                <i class="fas fa-rupee-sign"></i>
+                <h3>Total Amount</h3>
+            </div>
+            <div class="card-body">
+                <p>₹<?php echo number_format($itemSummary['total_amount'], 2); ?></p>
+            </div>
+        </div>
+        <div class="card summary-card">
+            <div class="card-header">
+                <i class="fas fa-tags"></i>
+                <h3>Total Categories</h3>
+            </div>
+            <div class="card-body">
+                <p><?php echo htmlspecialchars($categoryCount['total_categories']); ?></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profit and Loss Section -->
+    <div class="card profit-loss-card">
+        <div class="card-header">
+            <i class="fas fa-dollar-sign"></i>
+            <h3>Profit and Loss</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Total Revenue:</strong> ₹<?php echo number_format($profitLoss['total_revenue'], 2); ?></p>
+            <p><strong>Total Cost:</strong> ₹<?php echo number_format($profitLoss['total_cost'], 2); ?></p>
+            <p><strong>Profit:</strong> ₹<?php echo number_format($profitLoss['total_profit'], 2); ?></p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <!-- Category Distribution Chart -->
+        <div class="card chart-card">
+            <div class="card-header">
+                <i class="fas fa-pie-chart"></i>
+                <h3>Category Distribution</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Item Distribution Chart -->
+        <div class="card chart-card">
+            <div class="card-header">
+                <i class="fas fa-pie-chart"></i>
+                <h3>Item Distribution</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="itemChart"></canvas>
+            </div>
+        </div>
+    </div>
 
 <?php include 'includes/footer.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Total Quantity Meter (40% filled)
-    var ctxTotalQty = document.getElementById('totalQtyMeter').getContext('2d');
-    var totalQtyMeter = new Chart(ctxTotalQty, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [40, 60], // 40% filled
-                backgroundColor: ['#4CAF50', '#E0E0E0'], // Green fill, light gray background
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%', // Adjusted to make the circle smaller
-            responsive: true,
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false }
-            }
-        }
-    });
-
-    // Sales Meter (60% filled)
-    var ctxSales = document.getElementById('salesMeter').getContext('2d');
-    var salesMeter = new Chart(ctxSales, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [60, 40], // 60% filled
-                backgroundColor: ['#FF9800', '#E0E0E0'], // Orange fill, light gray background
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%', // Adjusted to make the circle smaller
-            responsive: true,
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false }
-            }
-        }
-    });
-
-    // Profit Meter (50% filled)
-    var ctxProfit = document.getElementById('profitMeter').getContext('2d');
-    var profitMeter = new Chart(ctxProfit, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [50, 50], // 50% filled
-                backgroundColor: ['#FFC107', '#E0E0E0'], // Yellow fill, light gray background
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%', // Adjusted to make the circle smaller
-            responsive: true,
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false }
-            }
-        }
-    });
-
-    // Stock Meter (70% filled)
-    var ctxStock = document.getElementById('stockMeter').getContext('2d');
-    var stockMeter = new Chart(ctxStock, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [70, 30], // 70% filled
-                backgroundColor: ['#2196F3', '#E0E0E0'], // Blue fill, light gray background
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%', // Adjusted to make the circle smaller
-            responsive: true,
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false }
-            }
-        }
-    });
-
-    // Dead Stock Meter (30% filled)
-    var ctxDeadStock = document.getElementById('deadStockMeter').getContext('2d');
-    var deadStockMeter = new Chart(ctxDeadStock, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [30, 70], // 30% filled
-                backgroundColor: ['#F44336', '#E0E0E0'], // Red fill, light gray background
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '70%', // Adjusted to make the circle smaller
-            responsive: true,
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false }
-            }
-        }
-    });
-});
-document.addEventListener('DOMContentLoaded', function() {
-
-// Custom Plugin to display the percentage in the center
-const centerTextPlugin = {
-    id: 'centerText',
-    beforeDraw: function(chart) {
-        if (chart.config.type === 'doughnut') {
-            const width = chart.width;
-            const height = chart.height;
-            const ctx = chart.ctx;
-            ctx.restore();
-
-            const fontSize = (height / 150).toFixed(2);
-            ctx.font = `${fontSize}em sans-serif`;
-            ctx.textBaseline = 'middle';
-
-            const text = Math.round(chart.data.datasets[0].data[0]) + '%';
-            const textX = Math.round((width - ctx.measureText(text).width) / 2);
-            const textY = height / 2;
-
-            ctx.fillText(text, textX, textY);
-            ctx.save();
-        }
-    }
-};
-
-// Registering the plugin
-Chart.register(centerTextPlugin);
-
-// Total Quantity Meter (40% filled)
-var ctxTotalQty = document.getElementById('totalQtyMeter').getContext('2d');
-var totalQtyMeter = new Chart(ctxTotalQty, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [40, 60], // 40% filled
-            backgroundColor: ['#4CAF50', '#E0E0E0'], // Green fill, light gray background
-            borderWidth: 0
-        }]
-    },
-    options: {
-        cutout: '70%', // Adjusted to make the circle smaller
-        responsive: true,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-        }
-    }
-});
-
-// Sales Meter (60% filled)
-var ctxSales = document.getElementById('salesMeter').getContext('2d');
-var salesMeter = new Chart(ctxSales, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [60, 40], // 60% filled
-            backgroundColor: ['#FF9800', '#E0E0E0'], // Orange fill, light gray background
-            borderWidth: 0
-        }]
-    },
-    options: {
-        cutout: '70%',
-        responsive: true,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-        }
-    }
-});
-
-// Profit Meter (50% filled)
-var ctxProfit = document.getElementById('profitMeter').getContext('2d');
-var profitMeter = new Chart(ctxProfit, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [50, 50], // 50% filled
-            backgroundColor: ['#FFC107', '#E0E0E0'], // Yellow fill, light gray background
-            borderWidth: 0
-        }]
-    },
-    options: {
-        cutout: '70%',
-        responsive: true,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-        }
-    }
-});
-
-// Stock Meter (70% filled)
-var ctxStock = document.getElementById('stockMeter').getContext('2d');
-var stockMeter = new Chart(ctxStock, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [70, 30], // 70% filled
-            backgroundColor: ['#2196F3', '#E0E0E0'], // Blue fill, light gray background
-            borderWidth: 0
-        }]
-    },
-    options: {
-        cutout: '70%',
-        responsive: true,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-        }
-    }
-});
-
-// Dead Stock Meter (30% filled)
-var ctxDeadStock = document.getElementById('deadStockMeter').getContext('2d');
-var deadStockMeter = new Chart(ctxDeadStock, {
-    type: 'doughnut',
-    data: {
-        datasets: [{
-            data: [30, 70], // 30% filled
-            backgroundColor: ['#F44336', '#E0E0E0'], // Red fill, light gray background
-            borderWidth: 0
-        }]
-    },
-    options: {
-        cutout: '70%',
-        responsive: true,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-        }
-    }
-});
-});
-
-</script>
-
