@@ -5,45 +5,41 @@ include 'includes/db.php';
 
 $update_success = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'sell_full') {
+// Handle 'sell_full' and 'offer' actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = $_POST['item_id'];
     $quantity = $_POST['quantity'];
     $price = $_POST['price'];
+    $action = $_POST['action'];
 
-    // Insert into sales table
-    $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Full Sale', NOW())");
-    $total_amount = $quantity * $price;
-    $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
-    if ($stmt->execute()) {
-        // Update item quantity to 0 after selling full
-        $stmt_update = $conn->prepare("UPDATE items SET quantity = 0 WHERE id = ?");
-        $stmt_update->bind_param("i", $item_id);
-        $stmt_update->execute();
-        
-        $update_success = true;
+    if ($action === 'sell_full') {
+        // Full sale: Insert into sales table and update item quantity to 0
+        $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Full Sale', NOW())");
+        $total_amount = $quantity * $price;
+        $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
+
+        if ($stmt->execute()) {
+            $stmt_update = $conn->prepare("UPDATE items SET quantity = 0 WHERE id = ?");
+            $stmt_update->bind_param("i", $item_id);
+            $stmt_update->execute();
+            $update_success = true;
+        }
+    } elseif ($action === 'offer') {
+        // Offer sale: Insert into sales table and update item quantity
+        $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Offer', NOW())");
+        $total_amount = $quantity * $price;
+        $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
+
+        if ($stmt->execute()) {
+            $stmt_update = $conn->prepare("UPDATE items SET quantity = quantity - ? WHERE id = ?");
+            $stmt_update->bind_param("ii", $quantity, $item_id);
+            $stmt_update->execute();
+            $update_success = true;
+        }
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'offer') {
-    $item_id = $_POST['item_id'];
-    $quantity = $_POST['quantity'];
-    $price = $_POST['price'];
-    
-    // Insert into sales table as an Offer
-    $stmt = $conn->prepare("INSERT INTO sales (item_id, quantity, total_amount, sale_type, sale_date) VALUES (?, ?, ?, 'Offer', NOW())");
-    $total_amount = $quantity * $price;
-    $stmt->bind_param("iid", $item_id, $quantity, $total_amount);
-    if ($stmt->execute()) {
-        // Update item quantity (if partially sold)
-        $stmt_update = $conn->prepare("UPDATE items SET quantity = quantity - ? WHERE id = ?");
-        $stmt_update->bind_param("ii", $quantity, $item_id);
-        $stmt_update->execute();
-        
-        $update_success = true;
-    }
-}
-
-// Prepare and execute the SQL statement for retrieving dead stock items
+// Fetch dead stock items
 $stmt = $conn->prepare("SELECT items.*, categories.category_name FROM items 
                         JOIN categories ON items.category_id = categories.id 
                         WHERE items.user_id = ? AND items.quantity != 0");
@@ -51,7 +47,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Calculate the total dead stock amount
+// Calculate the total dead stock value
 $total_dead_stock_amount = 0;
 while ($row = $result->fetch_assoc()) {
     $item_total_value = $row['quantity'] * $row['price'];
@@ -122,53 +118,80 @@ while ($row = $result->fetch_assoc()) {
     </div>
 </div>
 
-<!-- Lightbox Modal -->
-<div id="lightboxModal" class="lightbox-modal">
+<!-- Manage Dead Stock Modal Form -->
+<div id="manageDeadStockModal" class="lightbox-modal">
     <div class="lightbox-content">
         <span class="close-btn">&times;</span>
         <h2 id="lightboxTitle">Action</h2>
+        
+        <!-- Best Practice Form -->
         <form id="lightboxForm" method="POST" action="">
+            <!-- Hidden inputs for storing values -->
             <input type="hidden" name="item_id" id="item_id">
             <input type="hidden" name="quantity" id="quantity">
             <input type="hidden" name="price" id="price">
+            <input type="hidden" name="action" id="action">
+            
+            <!-- Action description -->
             <p id="lightboxDescription"></p>
-            <button type="submit" class="btn btn-primary">Confirm</button>
+            
+            <!-- Quantity Field -->
+            <div class="form-group">
+                <label for="quantityInput">Enter Quantity:</label>
+                <input type="number" name="quantityInput" id="quantityInput" class="form-control" min="1" required>
+            </div>
+            
+            <!-- Total Price Display -->
+            <div class="form-group">
+                <label for="totalPriceDisplay">Total Price:</label>
+                <input type="text" id="totalPriceDisplay" class="form-control" readonly>
+            </div>
+
+            <!-- Confirmation Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Confirm</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
+            </div>
         </form>
     </div>
 </div>
 
-
-<?php include 'includes/footer.php'; ?>
-
 <script>
-    const lightboxModal = document.getElementById('lightboxModal');
-const closeBtn = document.querySelector('.close-btn');
+    function openLightbox(action, itemId, quantity, price) {
+        var lightboxModal = document.getElementById('manageDeadStockModal');
+        lightboxModal.style.display = 'flex'; 
+        document.getElementById('item_id').value = itemId;
+        document.getElementById('quantity').value = quantity;
+        document.getElementById('price').value = price;
+        document.getElementById('action').value = action;
 
-function openLightbox(action, itemId, quantity, price) {
-    lightboxModal.style.display = 'flex';  // Changed from 'block' to 'flex' for centering
-    document.getElementById('item_id').value = itemId;
-    document.getElementById('quantity').value = quantity;
-    document.getElementById('price').value = price;
-
-    if (action === 'sell_full') {
-        document.getElementById('lightboxTitle').innerText = 'Sell Full Item';
-        document.getElementById('lightboxDescription').innerText = 'Are you sure you want to sell this item completely?';
-    } else if (action === 'offer') {
-        document.getElementById('lightboxTitle').innerText = 'Offer Item';
-        document.getElementById('lightboxDescription').innerText = 'Are you sure you want to offer this item?';
+        if (action === 'sell_full') {
+            document.getElementById('lightboxTitle').innerText = 'Sell Full Item';
+            document.getElementById('lightboxDescription').innerText = 'Are you sure you want to sell this item completely?';
+        } else if (action === 'offer') {
+            document.getElementById('lightboxTitle').innerText = 'Offer Item';
+            document.getElementById('lightboxDescription').innerText = 'Are you sure you want to offer this item?';
+        }
     }
-    
-    document.getElementById('lightboxForm').innerHTML += '<input type="hidden" name="action" value="' + action + '">';
-}
 
-closeBtn.onclick = function () {
-    lightboxModal.style.display = 'none';
-};
+    // Update total price based on quantity input
+    document.getElementById('quantityInput').addEventListener('input', function () {
+        var price = parseFloat(document.getElementById('price').value);
+        var quantity = parseInt(this.value);
+        var totalPrice = price * quantity;
+        document.getElementById('totalPriceDisplay').value = '₹' + totalPrice.toFixed(2);
+    });
 
-window.onclick = function (event) {
-    if (event.target === lightboxModal) {
-        lightboxModal.style.display = 'none';
-    }
-};
+    // Close modal logic
+    var closeBtn = document.querySelector('.close-btn');
+    closeBtn.onclick = function () {
+        document.getElementById('manageDeadStockModal').style.display = 'none';
+    };
 
+    window.onclick = function (event) {
+        if (event.target === document.getElementById('manageDeadStockModal')) {
+            document.getElementById('manageDeadStockModal').style.display = 'none';
+        }
+    };
 </script>
+<?php include 'includes/footer.php'; ?>

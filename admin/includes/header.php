@@ -49,7 +49,7 @@ $username = $_SESSION['firstname'] ?? 'Admin';
 
                 <li><a href="manage_users.php"><i class="fas fa-users"></i> Manage Users</a></li>
 
-                <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
+                <li> <a href="profile.php"><i class="fas fa-user-cog"></i> My Profile</a></li>
             </ul>
 
             <!-- User Profile Dropdown -->

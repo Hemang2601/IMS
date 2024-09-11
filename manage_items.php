@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     // Update item in the database
     $stmt = $conn->prepare("UPDATE items SET name = ?, category_id = ?, quantity = ?, price = ?, image = ? WHERE id = ? AND user_id = ?");
-    $stmt->bind_param("siidisii", $name, $category_id, $quantity, $price, $image, $item_id, $user_id);
+    $stmt->bind_param("siidssi", $name, $category_id, $quantity, $price, $image, $item_id, $user_id);
 
     if ($stmt->execute()) {
         $update_success = true;
@@ -189,38 +189,38 @@ $result = $stmt->get_result();
         <span class="modal-close" onclick="closeEditModal()">&times;</span>
         <h2>Edit Item</h2>
         <form id="editItemForm" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="item_id" id="edit_item_id">
             <input type="hidden" name="action" value="update_item">
-            <label for="name">Name:</label>
-            <input type="text" id="item_name" name="name" required>
-            <label for="category">Category:</label>
-            <select id="item_category" name="category" required>
+            <input type="hidden" name="item_id" id="editItemId">
+            <label for="editName">Name:</label>
+            <input type="text" name="name" id="editName" required>
+            <label for="editCategory">Category:</label>
+            <select name="category" id="editCategory" required>
                 <?php
+                // Fetch categories for the dropdown
                 $categories = $conn->query("SELECT * FROM categories");
                 while ($cat = $categories->fetch_assoc()) {
                     echo '<option value="' . $cat['id'] . '">' . htmlspecialchars($cat['category_name']) . '</option>';
                 }
                 ?>
             </select>
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="item_quantity" name="quantity" required>
-            <label for="price">Price:</label>
-            <input type="number" id="item_price" name="price" step="0.01" required>
-            <label for="image">Image:</label>
-            <input type="file" id="item_image" name="image">
-            <button type="submit">Update Item</button>
+            <label for="editQuantity">Quantity:</label>
+            <input type="number" name="quantity" id="editQuantity" required>
+            <label for="editPrice">Price:</label>
+            <input type="number" step="0.01" name="price" id="editPrice" required>
+            <label for="editImage">Image:</label>
+            <input type="file" name="image" id="editImage">
+            <button type="submit" class="btn btn-primary">Update Item</button>
         </form>
     </div>
 </div>
 
 <script>
-function openEditModal(id, name, category, quantity, price) {
-    document.getElementById('edit_item_id').value = id;
-    document.getElementById('item_name').value = name;
-    document.getElementById('item_category').value = category;
-    document.getElementById('item_quantity').value = quantity;
-    document.getElementById('item_price').value = price;
-
+function openEditModal(id, name, category_id, quantity, price) {
+    document.getElementById('editItemId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editCategory').value = category_id;
+    document.getElementById('editQuantity').value = quantity;
+    document.getElementById('editPrice').value = price;
     document.getElementById('editItemModal').style.display = 'block';
 }
 
@@ -228,16 +228,23 @@ function closeEditModal() {
     document.getElementById('editItemModal').style.display = 'none';
 }
 
-function filterCategory(categoryId) {
-    var tableRows = document.getElementById('itemsTableBody').getElementsByTagName('tr');
-    for (var i = 0; i < tableRows.length; i++) {
-        var row = tableRows[i];
-        if (row.getAttribute('data-category') === categoryId || categoryId === 'all') {
+function filterCategory(category_id) {
+    var rows = document.querySelectorAll('#itemsTableBody tr');
+    rows.forEach(function(row) {
+        if (category_id === 'all' || row.getAttribute('data-category') == category_id) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
         }
-    }
+    });
 }
 </script>
-<?php include 'includes/footer.php'; ?>
+
+</body>
+</html>
+
+<?php
+// Close connection
+$conn->close();
+include 'includes/footer.php';
+?>

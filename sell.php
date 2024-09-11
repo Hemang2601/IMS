@@ -42,8 +42,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $item_name = $item_result->fetch_assoc()['name'];
         $item_query->close();
 
+        // Insert sale data into sales table
+        $insert_sale = $conn->prepare("INSERT INTO sales (item_id, quantity, price_per_unit, total_amount, sale_name, customer_phone) VALUES (?, ?, ?, ?, ?, ?)");
+        $insert_sale->bind_param("iiddss", $item_id, $quantity, $price, $total_amount, $sale_name, $customer_phone);
+        if ($insert_sale->execute()) {
+            $sale_message = "<div class='alert success'>Sale recorded successfully.</div>";
+        } else {
+            $sale_message = "<div class='alert danger'>Error recording sale: " . $conn->error . "</div>";
+        }
+        $insert_sale->close();
+
         // Show sale details
-        $sale_message = "
+        $sale_message .= "
             <div class='invoice'>
                 <h3>Invoice</h3>
                 <div class='row'>

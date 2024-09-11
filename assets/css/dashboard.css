@@ -42,7 +42,8 @@
 }
 
 .summary-card {
-    flex: 1;
+    flex: 1 1 calc(33.333% - 20px); /* 3 cards per row with margin */
+    box-sizing: border-box;
     text-align: center;
     background-color: #f0f4c3;
 }
@@ -69,5 +70,19 @@
 }
 
 .category-card {
+    flex: 1 1 calc(33.333% - 20px); /* 3 cards per row with margin */
     background-color: #fff8e1;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .summary-card, .category-card {
+        flex: 1 1 calc(50% - 20px); /* 2 cards per row on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-card, .category-card {
+        flex: 1 1 100%; /* 1 card per row on very small screens */
+    }
 }
